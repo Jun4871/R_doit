@@ -9,22 +9,43 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+```{r}
+#rm(list=ls())
+library(mapproj)
+library(stringi)
+library(devtools)
+library(ggiraphExtra)
+library(dplyr)
+#install.packages("devtools")
+library(kormaps2014)
+library(maps)
+#remove.packages("devtools")
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+#devtools::install_github("cardiomoon/kormaps2014", force = TRUE)
+library(kormaps2014)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+str(korpop1)
+korpop1 <- rename(korpop1, pop = 총인구_명, name = 행정구역별_읍면동) 
 
-```{r cars}
-summary(cars)
+str(changeCode(kormap1))
+
+ggChoropleth(data = korpop1,      # 지도에 표현할 데이터
+             aes(fill = pop,      # 색깔로 표현할 변수
+                 map_id = code,   # 지역 기준 변수
+                 tooltip = name), # 지도 위에 표시할 지역명
+             map = kormap1,       # 지도 데이터
+             interactive = TRUE)  
+
+# 대한민국 시도별 결핵 환자 수 단계 구분도 만들기
+
+str(changeCode(tbc))
+
+tbc$name <- iconv(tbc$name)
+
+ggChoropleth(data = tbc, 
+             aes(fill = NewPts,
+                 map_id = code,
+                 tooltip = name),
+             map = kormap1,
+             interactive = TRUE)
 ```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

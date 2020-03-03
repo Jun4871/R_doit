@@ -25,7 +25,7 @@ library(maps)
 library(kormaps2014)
 
 str(korpop1)
-korpop1 <- rename(korpop1, pop = 총인구_명, name = 행정구역별_읍면동) 
+# korpop1 <- rename(korpop1, pop = 총인구_명, name = 행정구역별_읍면동) 
 
 str(changeCode(kormap1))
 

@@ -33,9 +33,10 @@ head(fortify(house1))
 h1 <- ggplot(data = house1, aes(x = .fitted, y= .resid)) +
                geom_point() +
                geom_hline(yintercept = 0) +
-               geom_smooth(se=FALSE) +
+               geom_smooth(se = F) +
                labs(x = "Fitted Values", y ="Residuals")
 
 # 플롯 프린팅
 h1               
 
+h1 + geom_point(aes(color = Boro))

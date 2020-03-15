@@ -1,0 +1,158 @@
+---
+title: "통계적 가설 검정"
+author: "Jun"
+date: "`r Sys.Date()`"
+output: 
+   prettydoc::html_pretty:
+    theme: tactile
+    df_print: paged
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<p align="center">
+  <img src="http://image.kyobobook.co.kr/images/book/large/949/l9791187370949.jpg"><br>
+  <b>출처: [**Do it! 쉽게 배우는 R 데이터 분석**](http://www.kyobobook.co.kr/product/detailViewKor.laf?ejkGb=KOR&mallGb=KOR&barcode=9791187370949&orderClick=LEa&Kc=)</b><br>
+  <b>Github Code: [Jun4871 Github](https://github.com/Jun4871/copy_with_R_book/blob/master/Klusterling.Rmd)</b><br>
+</p>
+
+
+# 개요
+
+통계 분석은 크게 기술 통계와 추론 통계로 나눌 수 있다. 데이터를 요약해 설명하는 것을 **'기술통계'** 라고 한다. 그리고 단순히 숫자를 요약하는 것을 넘어 어떤 값이 바생할 확률을 계산하는 통계 기법을 **'추론 통계'**라 한다. 일반적으로 통계 분석을 수행했다는 것은 추론 통계를 이용해 가설 검정을 했다는 의미이다. 기술 통계 분석에서 집단 간 차이가 있는 것으로 나타났더라도 이는 우연에 의한 차이일 수 있다. 데이터를 이용해 신뢰할 수 있는 결론을 내리려면 유의확률을 계산하는 통계적 가설 검정 절차를 거쳐야 한다.  
+
+<br>
+
+유의확률을 이용해 가설을 검정하는 방법을 **'통계적 가설 검정'이라고 한다. '유의확률'은 실제로는 집단 간 차이가 없는데 우연히 차이가 있는 데이터가 추출될 확률을 의미한다. 통계 분석을 실시한 결과 유의확률이 크게 나타났다면 '집단 간 차이가 통계적으로 유의하지 않다.'고 해석한다. 이는 실제로 차이가 없더라도 우연에 의해 이 정도 차이가 관찰될 가능성이 크다는 의미이다. 반대로 유의확률이 작다면 '집단 간 차이가 통계적으로 유의하다'고 해석한다. 이는 실제로 차이가 없는데 우연히 이 정도의 차이가 관찰될 가능성이 작다. 우연이라고 보기 힘들다는 의미이다. 
+
+# t 검정 - 두 집단의 평균 비교
+
+'t 검정(t-test)'은 두 집단의 평균에 통계적으로 유의한 차이가 있는지 알아볼 때 사용하는 통계 분석 기법이다. 
+
+<br>
+
+### compact 자동차와 suv 자동차의 도시 연비 t 검정
+
+ggplot2 패키지의 mpg 데이터를 이용해 t 검정을 수행하는 방법을 알아보자. 소형차와 suv가 도시 연비에서 통계적으로 유의한 차이가 있는지를 알아보자. 
+
+```{r message=FALSE, fig.align="center", fig.height=8, fig.width = 14}
+mpg <- as.data.frame(ggplot2::mpg)
+
+library(dplyr)
+mpg_diff <- mpg %>% 
+  select(class, cty) %>% 
+  filter(class %in% c("compact","suv"))
+
+head(mpg_diff)
+table(mpg_diff$class)
+```
+
+<br>
+
+### t 검정
+
+t-test() 함수를 사용하여 t검정을 해보자. 앞에서 추출한 mpg_diff 데이터를 지정하고 ~ 기호를 이용해 비교값인 cty 변수와 class 변수를 지정하면 된다. t 검정은 비교하는 집단의 분산(값이 퍼져있는 정도)이 같은지 여부에 따라 적용하는 공식이 다르다. 여기서는 집단 간 분산이 같다고 가정하고 var.equal = TRUE 옵션을 지정한다. 
+
+```{r message=FALSE, fig.align="center", fig.height=8, fig.width = 14}
+t.test(data = mpg_diff, cty ~ class, var.equal = TRUE)
+```
+
+출력된 t 검정 결과에서 'p-value'가 유의확률을 의미한다. 일반적으로 유의확률 5%를 기준으로 삼고, p-value가 0.05 미만이면 '집단 간 차이가 통계적으로 유의하다'고 해석한다. 실제로는 차이가 없는데 이런 정도의 차이가 우연히 관찰된 확률이 5%보다 작다면, 이 차이를 우연이라고 보기 어렵다고 결론 내리는 것이다. 'p-value'<2.2e-16' 의 의미는 2.2 앞에 0이 16개 있는 값( 2.2 x 10 - 16승)보다 작다는 의미이다. p-value가 0.05 보다 작기 때문에 이 분석 결과는 'compact 와 suv 간 평균 도시 연비 차이가 통계적으로 유의하다'고 해석할 수 있다. 
+
+<br>
+
+### 일반 휘발유와 고급 휘발유의 도시 연비 t 검정
+
+이번에는 일반 휘발유를 사용하는 자동차와 고급 휘발유를 사용하는 자동차 간 도시 연비 차이가 통계적으로 유의한지 알아보자. 두 연료를 사용하는 자동차를 추출한 후 t 검정을 실시해보도록 하자. 
+
+```{r message=FALSE, fig.align="center", fig.height=8, fig.width = 14}
+mpg_diff2 <- mpg %>% 
+  select(fl, cty) %>% 
+  filter(fl %in% c("r", "p"))
+
+table(mpg_diff2$fl)
+
+t.test(data = mpg_diff2, cty ~ fl, var.equal = TRUE)
+```
+
+분석 결과를 보면 p-value 가 0.05 보다 큰 0.2875이다. 실제로는 차이가 없는데 우연에 의해 이런 결과가 관찰될 확률이 28.75라는 의미이다. 따라서 '일반 휘발유와 고급 휘발유를 사용하는 자동차 간 도시 연비 차이가 통계적으로 유의하지 않다'고 결론 내릴 수 있다. 출력 결과의 'sample estimates' 부분을 보면 고급 휘발유 자동차의 도시 연비 평균이 0.6 정도 높지만 이런 정도의 차이는 우연히 발생했을 가능성이 크다고 해석하는 것이다. 
+
+<br>
+
+### 상관분석 - 두 변수의 관계성 분석
+
+ggplot2의 패키지 economics 데이터를 이용해서 unemploy 와 pce 간의 통계적으로 유의한 상관관계가 있는지 알아보도록 하자. cor.test()를 이용하면 상관분석을 할 수 있다. 
+
+```{r message=FALSE, fig.align="center", fig.height=8, fig.width = 14}
+economics <- as.data.frame(ggplot2::economics)
+cor.test(economics$unemploy, economics$pce)
+```
+
+출력 결과를 보면 p-value가 0.05 미만이므로, 실업자 수와 개인 소비 지출의 상관이 통계적으로 유의하다고 해석할 수 있다.  출력 결과 맨 아래 'cor'이 상관계수를 의미한다. 상관계수가 0.61이므로, 실업자 수와 개인 소비 지출은 한 변수가 증가하면 다른 변수가 증가하는 정비례 관계임을 알 수 있다. 
+
+<br>
+
+### 상관행렬 히트맵 
+
+여러 변수의 관련성을 한 번에 알아보고자 할 경우, 모든 변수의 상관 관계를 나타낸 상관행렬을 만든다. 상관행렬을 보면 어떤 변수끼리 관련이 크고 적은지 파악할 수 있다.  cor() 함술늘 사용하면 상관행렬을 만들 수 있다. 
+```{r message=FALSE, fig.align="center", fig.height=8, fig.width = 14}
+head(mtcars)
+
+car_cor <- cor(mtcars) # 상관행렬 생성
+round(car_cor, 2) # 소수점 셋째 자리에서 반올림해 출력
+
+```
+
+출력된 상관행렬을 보면 mtcars의 11개 변수가 서로 얼마나 관련되어 있는지 알 수 있다. mpg(연비) 행과 cyl(실린더 수)열이 교차되는 부분을 보면 상관계수가 -0.85이므로, 연비가 높을수록 실린더 수가 적은 경향이 있다는 것을 알 수 있다. cyl 과 wt(무게)의 상관계수가 0.78이므로, 실린더 수가 많을수록 자동차가 무거운 경향이 있다는 것을 알 수 있다. 
+
+<br>
+
+### 상관계수 표현
+
+여러 변수로 상관행렬을 만들면 너무 많은 숫자로 구성되기 때문에 변수들의 관계를 파악하기 쉽지 않다. 이럴 때 corrplot 패키지의 corrplot() 함수를 사용하여 상관행렬을 히트맵으로 만들면 변수들의 관계를 쉽게 파악할 수 있다. 히트맵은 값의 크기를 색깔로 표현한 그래프이다. 
+```{r}
+
+library(corrplot)
+corrplot(car_cor)
+```
+
+
+출력된 히트맵을 보면 상관계수가 클수록 원의 크기가 크고 색깔이 진한 것을 알 수 있다. 상관계수가 양수면 파란색, 음수면 빨간색 계열로 표현되어 있다. 
+
+<br>
+
+또한 파라미터를 이용해 그래프 형태를 다양하게 바꿀 수 있다. method = number로 지정하여 원 대신 상관계수가 표현된 그래프이다. 
+```{r message=FALSE, fig.align="center", fig.height=8, fig.width = 14}
+corrplot(car_cor, method = "number")
+```
+
+<br>
+
+### 색상 변경
+
+이번에는 다양한 파라미터를 지정해 보자. 그래프 색깔을 바꾸기 위해 colorRampPalette() 함수를 사용해 색상 코드 목록을 생성하는 col() 함수를 만들어 파라미터에 활용해보았다. 
+
+```{r message=FALSE, fig.align="center", fig.height=8, fig.width = 14}
+col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
+
+corrplot(car_cor,
+         method = "color",
+         col = col(200),
+         type = "lower",
+         order = "hclust",
+         addCoef.col = "black",
+         tl.col = "black",
+         tl.srt = 45,
+         diag = FALSE)
+
+```
+
+<br> 
+
+# 정리
+
+교재를 참고하여 통계적 가설 검증에 대해 알아보았다. 단순하게 숫자를 넘어서 어떻게 해당 데이터가 통계적으로 유의하다고 이야기 할 수 있는지 t-test를 통해 알아보았다. 또 변수간의 관계성의 강도를 측정하는 상관분석에 대해 알아보았다. 데이터를 다루는 사람이라면 스스로가 만든 데이터가 목표달성에 어떻게 도움을 줄 수 있는지, 얼마만큼 의미가 있는지를 이야기할 수 있어야하기 때문에 이러한 가설에 대한 검증은 필연적으로 수반되어야 하는 부분일 것이다. 
+

@@ -1,0 +1,34 @@
+---
+title: "t_test"
+author: "Ryu"
+date: '2020 3 12 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 패키지 로드
+
+```{r}
+
+mpg <- as.data.frame(ggplot2::mpg)
+
+library(dplyr)
+
+mpg_diff <- mpg %>% 
+  select(class, cty) %>% 
+  filter(class %in% c("compact", "suv"))
+
+head(mpg_diff)
+
+table(mpg_diff$class)
+```
+
+# t.test
+
+```{r}
+t.test(data = mpg_diff, cty - class, var.equal = TRUE)
+```
+
